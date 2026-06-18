@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Studentprofile.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>Menu</h2>
+    <ul>
+        <li onclick="showUploadSection()">Upload Achievement</li>
+        <li onclick="showViewSection()">View Achievements</li>
+        <li onclick="showPortfolioSection()">🗂️ Create Portfolio</li>
+        <li onclick="logout()" style="color:red;">Logout</li>
+    </ul>
+</div>
+
+<div class="main-content">
+
+<!-- ================= UPLOAD SECTION ================= -->
+<section id="uploadSection">
+<div class="dashboard-card">
+<h2>Upload Achievement</h2>
+<form id="achievementForm">
+<label>Category</label>
+<select id="category" name="category" class="form-select" onchange="loadCategoryForm()" required>
+  <option value="">Select Category</option>
+  <option value="conference">Conference Publication</option>
+  <option value="cultural">Cultural Participation</option>
+  <option value="higher">Higher Education</option>
+  <option value="internship">Internship Achievements</option>
+  <option value="journal">Journal Publication</option>
+  <option value="sports">Sport Participation</option>
+  <option value="technical">Technical Events</option>
+</select>
+<div id="dynamicFields" class="mt-4"></div>
+<br>
+<button type="button" class="btn btn-success" onclick="submitAchievement()">
+    Upload Achievement
+</button>
+</form>
+</div>
+</section>
+
+<!-- ================= VIEW SECTION ================= -->
+<section id="viewSection" class="d-none">
+<div class="dashboard-card">
+<h2>Your Achievements</h2>
+<ul id="achievementList" class="list-group mt-3"></ul>
+</div>
+</section>
+
+<!-- ================= PORTFOLIO SECTION ================= -->
+<section id="portfolioSection" class="d-none">
+<div class="dashboard-card">
+  <h2>Create Your Portfolio</h2>
+  <p class="text-muted mb-4" style="font-size:0.9rem;">
+    Fill in a few extra details — your achievements will be pulled automatically from the database.
+  </p>
+
+  <!-- Step 1: Extra Details -->
+  <div id="portfolioForm">
+
+    <h5 class="mb-3" style="font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;color:#888;">
+      Profile Information
+    </h5>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Full Name</label>
+        <input class="form-control" id="pf_name" placeholder="Your full name">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Email</label>
+        <input class="form-control" id="pf_email" type="email" placeholder="your@email.com">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Phone</label>
+        <input class="form-control" id="pf_phone" type="tel" placeholder="+91 XXXXX XXXXX">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">LinkedIn URL</label>
+        <input class="form-control" id="pf_linkedin" type="url" placeholder="https://linkedin.com/in/...">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">GitHub URL</label>
+        <input class="form-control" id="pf_github" type="url" placeholder="https://github.com/...">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Department</label>
+        <input class="form-control" id="pf_dept" placeholder="e.g. Computer Science">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Year of Study</label>
+        <select class="form-select" id="pf_year">
+          <option value="">Select Year</option>
+          <option value="First Year (FE)">First Year (FE)</option>
+          <option value="Second Year (SE)">Second Year (SE)</option>
+          <option value="Third Year (TE)">Third Year (TE)</option>
+          <option value="Final Year (BE)">Final Year (BE)</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label fw-semibold">About Me</label>
+        <textarea class="form-control" id="pf_about" rows="3"
+          placeholder="Write a short bio about yourself — your interests, goals, and what drives you."></textarea>
+      </div>
+    </div>
+
+    <h5 class="mb-3 mt-4" style="font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;color:#888;">
+      Skills
+    </h5>
+    <label class="form-label fw-semibold">Add Skills <small class="text-muted fw-normal">(press Enter or comma to add)</small></label>
+    <div class="tags-wrap" id="tagsWrap" onclick="document.getElementById('tagInput').focus()">
+      <input id="tagInput" placeholder="e.g. Python, Machine Learning...">
+    </div>
+    <input type="hidden" id="pf_skills">
+
+    <div class="mt-4">
+      <button class="btn btn-dark w-100" onclick="generatePortfolio()" id="generateBtn">
+        Generate Portfolio →
+      </button>
+      <p id="portfolioMsg" class="text-danger text-center mt-2" style="font-size:0.85rem;min-height:20px;"></p>
+    </div>
+  </div>
+
+</div>
+</section>
+
+</div><!-- end main-content -->
+
+<!-- ===== PORTFOLIO MODAL (generated output) ===== -->
+<div id="portfolioModal" style="
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.6);
+  z-index:9999;
+  overflow-y:auto;
+  padding:32px 16px;
+">
+  <div style="
+    max-width:860px;margin:0 auto;
+    background:#faf9f7;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 24px 80px rgba(0,0,0,0.25);
+    font-family:'DM Sans',sans-serif;
+  ">
+    <!-- Modal toolbar -->
+    <div style="
+      display:flex;justify-content:space-between;align-items:center;
+      padding:14px 24px;
+      background:#0f0f0f;
+      color:white;
+    ">
+      <span style="font-size:0.85rem;opacity:0.7;">Portfolio Preview</span>
+      <div style="display:flex;gap:10px;">
+        <button onclick="printPortfolio()" style="
+          background:#fff;color:#0f0f0f;border:none;
+          padding:7px 16px;border-radius:6px;
+          font-size:0.82rem;font-weight:600;cursor:pointer;">
+          🖨️ Print / Save PDF
+        </button>
+        <button onclick="closePortfolio()" style="
+          background:transparent;color:white;border:1px solid rgba(255,255,255,0.3);
+          padding:7px 16px;border-radius:6px;
+          font-size:0.82rem;cursor:pointer;">
+          ✕ Close
+        </button>
+      </div>
+    </div>
+
+    <!-- Portfolio content renders here -->
+    <div id="portfolioOutput" style="padding:0;"></div>
+  </div>
+</div>
+
+<style>
+  /* Tags input */
+  .tags-wrap {
+    display:flex;flex-wrap:wrap;gap:8px;
+    padding:10px 14px;
+    border:1px solid #dee2e6;border-radius:8px;
+    background:white;min-height:46px;cursor:text;
+  }
+  .tag {
+    display:inline-flex;align-items:center;gap:6px;
+    background:#f0ebe2;border:1px solid #e0ddd8;
+    border-radius:20px;padding:3px 10px 3px 12px;
+    font-size:0.8rem;font-weight:500;
+  }
+  .tag button {
+    background:none;border:none;cursor:pointer;
+    color:#888;font-size:0.9rem;padding:0;
+    display:flex;align-items:center;
+  }
+  .tag button:hover { color:#e53e3e; }
+  #tagInput {
+    border:none;outline:none;
+    font-size:0.85rem;flex:1;min-width:120px;background:transparent;
+  }
+
+  /* Print: hide everything except portfolio output */
+  @media print {
+    body > * { display:none !important; }
+    #portfolioModal { display:block !important; position:static !important;
+      background:none !important; padding:0 !important; }
+    #portfolioModal > div { box-shadow:none !important; border-radius:0 !important; }
+    #portfolioModal > div > div:first-child { display:none !important; }
+  }
+</style>
+
+<script src="studentprofile.js"></script>
+</body>
+</html>

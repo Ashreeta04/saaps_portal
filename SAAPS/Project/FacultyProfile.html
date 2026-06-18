@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Faculty Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="FaultyLoginPage.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+  <style>
+    .search-bar-row { display:flex; gap:12px; align-items:center; margin-bottom:24px; flex-wrap:wrap; }
+    .search-bar-row select, .search-bar-row input { flex:1; min-width:160px; }
+    .search-bar-row .btn-search {
+      background:#2563eb; color:#fff; border:none; padding:10px 22px;
+      border-radius:8px; font-weight:600; cursor:pointer; transition:0.2s; white-space:nowrap;
+    }
+    .search-bar-row .btn-search:hover { background:#1d4ed8; }
+    .btn-download-pdf {
+      background:linear-gradient(135deg,#059669,#047857); color:#fff; border:none;
+      padding:10px 22px; border-radius:8px; font-weight:600; cursor:pointer;
+      transition:0.2s; display:none; margin-bottom:20px;
+    }
+    .btn-download-pdf:hover { background:#047857; transform:translateY(-2px); }
+    .results-table-wrap { overflow-x:auto; margin-top:8px; }
+    .results-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+    .results-table th {
+      background:rgba(59,130,246,0.2); color:#93c5fd;
+      padding:10px 12px; text-align:left; font-weight:600; white-space:nowrap;
+    }
+    .results-table td {
+      padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.07);
+      vertical-align:middle; color:#e2e8f0;
+    }
+    .results-table tr:hover td { background:rgba(255,255,255,0.04); }
+    .badge-category {
+      display:inline-block; padding:3px 10px; border-radius:20px;
+      font-size:0.75rem; font-weight:600; background:rgba(59,130,246,0.2);
+      color:#93c5fd; white-space:nowrap;
+    }
+    .cert-link { color:#4ade80; font-size:0.8rem; text-decoration:none; cursor:pointer; }
+    .cert-link:hover { text-decoration:underline; }
+    .no-cert { color:#64748b; font-size:0.78rem; }
+    .result-summary { font-size:0.85rem; color:#94a3b8; margin-bottom:12px; }
+    .search-msg { font-size:0.88rem; margin-top:8px; min-height:20px; }
+
+    /* ANALYSIS */
+    .analysis-filter-row {
+      display:grid; grid-template-columns:1fr 1fr 1fr auto;
+      gap:12px; align-items:end; margin-bottom:24px;
+    }
+    @media(max-width:768px){ .analysis-filter-row { grid-template-columns:1fr; } }
+    .analysis-filter-row label {
+      display:block; font-size:0.75rem; font-weight:600; color:#94a3b8;
+      margin-bottom:5px; text-transform:uppercase; letter-spacing:0.05em;
+    }
+    .analysis-stats { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:22px; }
+    .stat-pill {
+      background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2);
+      border-radius:10px; padding:10px 18px; min-width:110px;
+    }
+    .stat-pill strong { display:block; font-size:1.5rem; font-weight:700; color:#60a5fa; line-height:1.2; }
+    .stat-pill span { font-size:0.72rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; }
+    .analysis-dl-row { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+    .btn-dl-table {
+      background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; border:none;
+      padding:10px 20px; border-radius:8px; font-weight:600; font-size:0.85rem;
+      cursor:pointer; transition:0.2s; display:flex; align-items:center; gap:7px;
+    }
+    .btn-dl-table:hover { opacity:0.88; transform:translateY(-1px); }
+    .btn-dl-certs {
+      background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; border:none;
+      padding:10px 20px; border-radius:8px; font-weight:600; font-size:0.85rem;
+      cursor:pointer; transition:0.2s; display:flex; align-items:center; gap:7px;
+    }
+    .btn-dl-certs:hover { opacity:0.88; transform:translateY(-1px); }
+
+    /* Analysis table */
+    .analysis-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+    .analysis-table th {
+      background:rgba(59,130,246,0.15); color:#93c5fd;
+      padding:10px 12px; text-align:left; font-weight:600; white-space:nowrap;
+      border-bottom:1px solid rgba(59,130,246,0.2);
+    }
+    .analysis-table td {
+      padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.06);
+      vertical-align:middle; color:#e2e8f0;
+    }
+    .analysis-table tr:hover td { background:rgba(255,255,255,0.03); }
+    .analysis-table .sr { color:#64748b; font-size:0.78rem; }
+    .td-truncate { max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* Badges */
+    .badge-conference { background:rgba(52,211,153,0.15);  color:#34d399; display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+    .badge-cultural   { background:rgba(251,191,36,0.15);  color:#fbbf24; display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+    .badge-higher     { background:rgba(96,165,250,0.15);  color:#60a5fa; display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+    .badge-internship { background:rgba(167,139,250,0.15); color:#a78bfa; display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+    .badge-journal    { background:rgba(248,113,113,0.15); color:#f87171; display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+    .badge-sports     { background:rgba(251,146,60,0.15);  color:#fb923c; display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+    .badge-technical  { background:rgba(100,116,139,0.15); color:#94a3b8; display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; }
+
+    /* Category section headers in mixed view */
+    .cat-section-label {
+      display:flex; align-items:center; gap:10px;
+      margin:24px 0 10px; font-size:0.9rem; font-weight:700; color:#e2e8f0;
+    }
+    .cat-section-label hr { flex:1; border:none; border-top:1px solid rgba(255,255,255,0.08); }
+
+    /* Certs */
+    .cert-section-header { display:flex; align-items:center; justify-content:space-between; margin:32px 0 16px; }
+    .cert-section-header h5 { font-size:1rem; font-weight:700; color:#e2e8f0; margin:0; }
+    .cert-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; margin-bottom:10px; }
+    .cert-card {
+      background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+      border-radius:10px; overflow:hidden; transition:border-color 0.2s,transform 0.2s;
+    }
+    .cert-card:hover { border-color:rgba(96,165,250,0.4); transform:translateY(-2px); }
+    .cert-card-preview { width:100%; height:150px; object-fit:cover; display:block; background:rgba(0,0,0,0.3); }
+    .cert-card-pdf-preview {
+      width:100%; height:150px; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:6px;
+      background:rgba(0,0,0,0.3); color:#64748b; font-size:0.8rem;
+    }
+    .cert-card-pdf-preview .pdf-icon { font-size:2.2rem; color:#f87171; }
+    .cert-card-body { padding:10px 14px 14px; }
+    .cert-card-body p { font-size:0.8rem; font-weight:600; color:#e2e8f0; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cert-card-body span { font-size:0.72rem; color:#64748b; }
+    .cert-card-body a { display:block; margin-top:8px; font-size:0.75rem; color:#60a5fa; text-decoration:none; font-weight:600; cursor:pointer; }
+    .cert-card-body a:hover { text-decoration:underline; }
+
+    .analysis-empty { text-align:center; padding:50px 20px; color:#475569; font-size:0.9rem; }
+    .analysis-empty .icon { font-size:2.5rem; margin-bottom:10px; }
+    .analysis-spinner {
+      display:inline-block; width:28px; height:28px;
+      border:3px solid rgba(96,165,250,0.2); border-top-color:#60a5fa;
+      border-radius:50%; animation:spin 0.7s linear infinite;
+      vertical-align:middle; margin-right:8px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .analysis-divider { border:none; border-top:1px solid rgba(255,255,255,0.07); margin:28px 0; }
+
+    #analysisDlRow    { display:none; }
+    #certSectionWrap  { display:none; }
+    #chartSectionWrap { display:none; }
+
+    /* PIE CHART */
+    .chart-section-title { font-size:1rem; font-weight:700; color:#e2e8f0; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+    .chart-card {
+      background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px; padding:28px 32px; margin-bottom:28px;
+    }
+    .chart-layout { display:flex; align-items:flex-start; gap:36px; flex-wrap:wrap; }
+    .chart-canvas-wrap { flex:0 0 340px; width:340px; height:340px; position:relative; }
+    .chart-legend { flex:1; min-width:220px; display:flex; flex-direction:column; gap:0; }
+    .legend-header {
+      display:grid; grid-template-columns:16px 1fr 48px 52px 56px; gap:8px;
+      padding:6px 10px; font-size:0.7rem; font-weight:700; color:#475569;
+      text-transform:uppercase; letter-spacing:0.06em;
+      border-bottom:1px solid rgba(255,255,255,0.07); margin-bottom:4px;
+    }
+    .legend-item {
+      display:grid; grid-template-columns:16px 1fr 48px 52px 56px; gap:8px;
+      align-items:center; padding:9px 10px; border-radius:8px; transition:background 0.15s; cursor:default;
+    }
+    .legend-item:hover { background:rgba(255,255,255,0.04); }
+    .legend-dot { width:13px; height:13px; border-radius:3px; flex-shrink:0; }
+    .legend-label { color:#cbd5e1; font-size:0.84rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .legend-count { font-weight:700; color:#f8fafc; font-size:0.9rem; text-align:right; }
+    .legend-bar-wrap { height:6px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+    .legend-bar-fill { height:100%; border-radius:3px; transition:width 0.6s ease; }
+    .legend-pct { color:#64748b; font-size:0.78rem; text-align:right; font-weight:600; }
+    .chart-total-badge { text-align:center; margin-top:16px; }
+    .chart-total-badge strong { display:block; font-size:1.8rem; font-weight:800; color:#f8fafc; line-height:1.1; }
+    .chart-total-badge span { font-size:0.72rem; color:#64748b; text-transform:uppercase; letter-spacing:0.08em; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>Menu</h2>
+  <ul>
+    <li onclick="showDashboard()">Dashboard</li>
+    <li onclick="showUpload()">Upload Achievement</li>
+    <li onclick="showView()">View My Achievements</li>
+    <li onclick="showClassSearch()">View Student Achievements</li>
+    <li onclick="showAnalysis()">📊 Analysis</li>
+    <li onclick="logout()" style="color:red;">Logout</li>
+  </ul>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- DASHBOARD -->
+  <section id="dashboardSection">
+    <div class="dashboard-card">
+      <h2>Dashboard</h2>
+      <div class="empty-state">Welcome, Faculty!</div>
+    </div>
+  </section>
+
+  <!-- UPLOAD -->
+  <section id="uploadSection" class="d-none">
+    <div class="dashboard-card">
+      <h2>Upload Achievement</h2>
+      <label>Category</label>
+      <select id="category" class="form-select" onchange="loadFields()">
+        <option value="">Select Category</option>
+        <option value="Awards">Awards</option>
+        <option value="Conference">Conference Publication</option>
+        <option value="Journal">Journal Publication</option>
+        <option value="FDP">Faculty Development Program</option>
+        <option value="Patent">Patent</option>
+        <option value="Workshop">Workshop</option>
+        <option value="others">General Achievement</option>
+      </select>
+      <div id="dynamicFields"></div>
+      <button type="button" class="btn" onclick="uploadAchievement()">Upload Achievement</button>
+      <p id="uploadMessage"></p>
+    </div>
+  </section>
+
+  <!-- VIEW MY ACHIEVEMENTS -->
+  <section id="viewSection" class="d-none">
+    <div class="dashboard-card">
+      <h2>My Achievements</h2>
+      <div id="achievementList"><div class="empty-state">Loading...</div></div>
+    </div>
+  </section>
+
+  <!-- VIEW STUDENT ACHIEVEMENTS BY CLASS -->
+  <section id="classSection" class="d-none">
+    <div class="dashboard-card">
+      <h2>Student Achievements by Class</h2>
+      <div class="search-bar-row">
+        <select id="classYearSelect" class="form-select">
+          <option value="">Select Class / Year</option>
+          <option value="FE">First Year (FE)</option>
+          <option value="SE">Second Year (SE)</option>
+          <option value="TE">Third Year (TE)</option>
+          <option value="BE">Final Year (BE)</option>
+        </select>
+        <select id="classDeptSelect" class="form-select">
+          <option value="">All Departments</option>
+          <option value="IT">IT</option><option value="CS">CS</option>
+          <option value="MECH">Mechanical</option><option value="CIVIL">Civil</option>
+          <option value="AIDS">AIDS</option><option value="ENTC">ENTC</option>
+          <option value="FY">First Year</option><option value="OTHERS">Others</option>
+        </select>
+        <button class="btn-search" onclick="searchClassAchievements()">🔍 Search</button>
+      </div>
+      <p id="searchMsg" class="search-msg"></p>
+      <button class="btn-download-pdf" id="downloadPdfBtn" onclick="downloadClassPdf()">
+        📥 Download All Certificates as PDF
+      </button>
+      <div class="result-summary" id="resultSummary"></div>
+      <div class="results-table-wrap" id="resultsWrap"></div>
+    </div>
+  </section>
+
+  <!-- ANALYSIS SECTION -->
+  <section id="analysisSection" class="d-none">
+    <div class="dashboard-card">
+      <h2>📊 Achievement Analysis</h2>
+      <p style="color:#64748b;font-size:0.85rem;margin-top:-8px;margin-bottom:24px;">
+        Filter student achievements, view pie chart by category, and download reports.
+      </p>
+
+      <!-- FILTERS -->
+      <div class="analysis-filter-row">
+        <div>
+          <label>Academic Year</label>
+          <select id="aYear" class="form-select">
+            <option value="">All Years</option>
+            <option value="FE">FE — First Year</option>
+            <option value="SE">SE — Second Year</option>
+            <option value="TE">TE — Third Year</option>
+            <option value="BE">BE — Final Year</option>
+          </select>
+        </div>
+        <div>
+          <label>Department</label>
+          <select id="aDept" class="form-select">
+            <option value="">All Departments</option>
+            <option value="IT">IT</option><option value="CS">CS</option>
+            <option value="MECH">Mechanical</option><option value="CIVIL">Civil</option>
+            <option value="AIDS">AIDS</option><option value="ENTC">ENTC</option>
+            <option value="FY">First Year</option><option value="OTHERS">Others</option>
+          </select>
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="aCat" class="form-select">
+            <option value="">All Categories</option>
+            <option value="conference">Conference</option>
+            <option value="cultural">Cultural</option>
+            <option value="higher">Higher Education</option>
+            <option value="internship">Internship</option>
+            <option value="journal">Journal</option>
+            <option value="sports">Sports</option>
+            <option value="technical">Technical</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn-search" onclick="runAnalysis()" style="width:100%;justify-content:center;display:flex;">
+            🔍 Search
+          </button>
+        </div>
+      </div>
+
+      <p id="analysisMsg" style="font-size:0.85rem;min-height:18px;margin-bottom:12px;color:#60a5fa;"></p>
+
+      <!-- STATS -->
+      <div class="analysis-stats" id="analysisStats" style="display:none;">
+        <div class="stat-pill"><strong id="statTotal">0</strong><span>Records</span></div>
+        <div class="stat-pill"><strong id="statStudents">0</strong><span>Students</span></div>
+        <div class="stat-pill"><strong id="statDepts">0</strong><span>Departments</span></div>
+        <div class="stat-pill"><strong id="statCerts">0</strong><span>Certificates</span></div>
+      </div>
+
+      <!-- PIE CHART -->
+      <div id="chartSectionWrap">
+        <p class="chart-section-title">🥧 Achievements by Category</p>
+        <div class="chart-card">
+          <div class="chart-layout">
+            <div>
+              <div class="chart-canvas-wrap">
+                <canvas id="categoryPieChart"></canvas>
+              </div>
+              <div class="chart-total-badge" id="chartTotalBadge"></div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-header">
+                <span></span><span>Category</span>
+                <span style="text-align:right">Count</span>
+                <span>Share</span>
+                <span style="text-align:right">%</span>
+              </div>
+              <div id="chartLegend"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOWNLOAD BUTTONS -->
+      <div class="analysis-dl-row" id="analysisDlRow">
+        <button class="btn-dl-table" onclick="downloadAnalysisTablePDF()">📄 Download Table as PDF</button>
+        <button class="btn-dl-certs" onclick="downloadAnalysisCertsPDF()">🗂 Download Certificates PDF</button>
+      </div>
+
+      <!-- TABLE -->
+      <div class="results-table-wrap" id="analysisTableWrap">
+        <div class="analysis-empty">
+          <div class="icon">🔍</div>
+          Select filters above and click <strong>Search</strong>
+        </div>
+      </div>
+
+      <hr class="analysis-divider">
+
+      <!-- CERTIFICATE CARDS -->
+      <div id="certSectionWrap">
+        <div class="cert-section-header"><h5>📎 Certificate Proofs</h5></div>
+        <div class="cert-grid" id="analysisCertGrid"></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+
+// ══════════════════════════════════════════
+// VIEW CERT — Blob approach with magic-byte MIME detection
+// Opens file in new tab, never downloads
+// route: 'get-faculty-certificate' or 'get-certificate'
+// ══════════════════════════════════════════
+async function viewCert(route, table, id) {
+  try {
+    const res = await fetch(`http://localhost:5000/${route}/${table}/${id}`);
+    if (!res.ok) { alert("Certificate not found."); return; }
+
+    // Read raw bytes to detect actual file type
+    const arrayBuffer = await res.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+
+    // Detect MIME type from magic bytes
+    let mimeType = "application/octet-stream";
+    if (bytes[0] === 0x25 && bytes[1] === 0x50) {
+      mimeType = "application/pdf";   // %P = PDF
+    } else if (bytes[0] === 0x89 && bytes[1] === 0x50) {
+      mimeType = "image/png";         // PNG
+    } else if (bytes[0] === 0xFF && bytes[1] === 0xD8) {
+      mimeType = "image/jpeg";        // JPEG
+    }
+
+    const blob = new Blob([arrayBuffer], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+
+  } catch (err) {
+    alert("Failed to load certificate.");
+    console.error(err);
+  }
+}
+
+// ── SESSION ──
+function getFacultyId() {
+  const raw = localStorage.getItem("faculty_user");
+  if (!raw) return null;
+  try { return JSON.parse(raw).id; } catch { return null; }
+}
+
+// ── NAV ──
+const ALL_SECTIONS = ["dashboardSection","uploadSection","viewSection","classSection","analysisSection"];
+function hideAll() { ALL_SECTIONS.forEach(id => document.getElementById(id).classList.add("d-none")); }
+function showDashboard()   { hideAll(); document.getElementById("dashboardSection").classList.remove("d-none"); }
+function showUpload()      { hideAll(); document.getElementById("uploadSection").classList.remove("d-none"); }
+function showView()        { hideAll(); document.getElementById("viewSection").classList.remove("d-none"); loadAchievements(); }
+function showClassSearch() { hideAll(); document.getElementById("classSection").classList.remove("d-none"); }
+function showAnalysis()    { hideAll(); document.getElementById("analysisSection").classList.remove("d-none"); }
+function logout()          { localStorage.removeItem("faculty_user"); window.location.href = "Server.html"; }
+
+// ── FORM FIELDS ──
+const certificateField = `
+  <div class="form-group full-width">
+    <label>Upload Certificate (PDF / Image)</label>
+    <input type="file" class="form-control" id="cert_file" accept=".pdf,.jpg,.jpeg,.png">
+  </div>`;
+
+function loadFields() {
+  const category = document.getElementById("category").value;
+  const box = document.getElementById("dynamicFields");
+  box.innerHTML = "";
+  document.getElementById("uploadMessage").innerText = "";
+  if (category === "Awards") {
+    box.innerHTML = `<div class="form-grid mt-4">
+      <div class="form-group"><label>Academic Year</label><input class="form-control" id="academic_year" placeholder="e.g. 2024-25"></div>
+      <div class="form-group"><label>Award Name</label><input class="form-control" id="award_name" placeholder="Award Name"></div>
+      <div class="form-group"><label>Awarded For</label><input class="form-control" id="awarded_for" placeholder="Awarded For"></div>
+      <div class="form-group"><label>Awarded By</label><input class="form-control" id="awarded_by" placeholder="Organization / Body"></div>
+      <div class="form-group"><label>Award Date</label><input type="date" class="form-control" id="award_date"></div>
+      <div class="form-group"><label>Level</label><input class="form-control" id="level" placeholder="e.g. National / International"></div>
+      ${certificateField}</div>`;
+  }
+  if (category === "Conference") {
+    box.innerHTML = `<div class="form-grid mt-4">
+      <div class="form-group"><label>Academic Year</label><input class="form-control" id="academic_year" placeholder="e.g. 2024-25"></div>
+      <div class="form-group"><label>Conference Type</label><input class="form-control" id="conference_type" placeholder="National / International"></div>
+      <div class="form-group full-width"><label>Paper Title</label><input class="form-control" id="paper_title" placeholder="Full paper title"></div>
+      <div class="form-group full-width"><label>Proceedings Title</label><input class="form-control" id="proceedings_title" placeholder="Proceedings / Book title"></div>
+      <div class="form-group"><label>Conference Name</label><input class="form-control" id="conference_name" placeholder="Conference Name"></div>
+      <div class="form-group"><label>Conference Date</label><input type="date" class="form-control" id="conference_date"></div>
+      <div class="form-group"><label>Venue / Organizer</label><input class="form-control" id="venue_organizer" placeholder="Venue / Organizer"></div>
+      <div class="form-group"><label>Publication Year</label><input class="form-control" id="publication_year" placeholder="e.g. 2024"></div>
+      <div class="form-group"><label>ISSN / ISBN</label><input class="form-control" id="issn_isbn" placeholder="ISSN / ISBN"></div>
+      <div class="form-group"><label>Affiliating Institute</label><input class="form-control" id="affiliating_institute" placeholder="Institute"></div>
+      <div class="form-group"><label>Paper Link</label><input class="form-control" id="paper_link" placeholder="https://..."></div>
+      <div class="form-group"><label>Financial Support (₹)</label><input type="number" class="form-control" id="financial_support" placeholder="0"></div>
+      ${certificateField}</div>`;
+  }
+  if (category === "Journal") {
+    box.innerHTML = `<div class="form-grid mt-4">
+      <div class="form-group"><label>Academic Year</label><input class="form-control" id="academic_year" placeholder="e.g. 2024-25"></div>
+      <div class="form-group"><label>Journal Name</label><input class="form-control" id="journal_name" placeholder="Journal Name"></div>
+      <div class="form-group full-width"><label>Paper Title</label><input class="form-control" id="paper_title" placeholder="Full paper title"></div>
+      <div class="form-group"><label>Conference Date</label><input type="date" class="form-control" id="conference_date"></div>
+      <div class="form-group"><label>Publication Date</label><input type="date" class="form-control" id="publication_date"></div>
+      <div class="form-group"><label>ISSN Number</label><input class="form-control" id="issn_number" placeholder="ISSN"></div>
+      <div class="form-group"><label>Indexing</label><input class="form-control" id="indexing" placeholder="e.g. Scopus, SCI"></div>
+      <div class="form-group"><label>Type</label><input class="form-control" id="conference_type" placeholder="Type"></div>
+      <div class="form-group"><label>DOI</label><input class="form-control" id="doi" placeholder="DOI link"></div>
+      ${certificateField}</div>`;
+  }
+  if (category === "FDP") {
+    box.innerHTML = `<div class="form-grid mt-4">
+      <div class="form-group"><label>Academic Year</label><input class="form-control" id="academic_year" placeholder="e.g. 2024-25"></div>
+      <div class="form-group"><label>Organized By</label><input class="form-control" id="organized_by" placeholder="Organized By"></div>
+      <div class="form-group full-width"><label>Title</label><input class="form-control" id="title" placeholder="FDP Title"></div>
+      <div class="form-group"><label>Start Date</label><input type="date" class="form-control" id="start_date"></div>
+      <div class="form-group"><label>End Date</label><input type="date" class="form-control" id="end_date"></div>
+      <div class="form-group"><label>Duration</label><input class="form-control" id="duration" placeholder="e.g. 5 Days"></div>
+      <div class="form-group"><label>Mode</label><input class="form-control" id="mode" placeholder="Online / Offline / Hybrid"></div>
+      ${certificateField}</div>`;
+  }
+  if (category === "Patent") {
+    box.innerHTML = `<div class="form-grid mt-4">
+      <div class="form-group"><label>Academic Year</label><input class="form-control" id="academic_year" placeholder="e.g. 2024-25"></div>
+      <div class="form-group"><label>Status</label><input class="form-control" id="status" placeholder="Filed / Published / Granted"></div>
+      <div class="form-group full-width"><label>Title</label><input class="form-control" id="title" placeholder="Patent Title"></div>
+      <div class="form-group"><label>Applicant Name</label><input class="form-control" id="applicant_name" placeholder="Applicant Name"></div>
+      <div class="form-group"><label>Application Number</label><input class="form-control" id="application_number" placeholder="Application No"></div>
+      <div class="form-group"><label>Filing Date</label><input type="date" class="form-control" id="filing_date"></div>
+      <div class="form-group"><label>Publication Number</label><input class="form-control" id="publication_number" placeholder="Publication No"></div>
+      <div class="form-group"><label>Grant Date</label><input type="date" class="form-control" id="grant_date"></div>
+      <div class="form-group"><label>Filed Through</label><input class="form-control" id="filed_through" placeholder="e.g. NIPAM / Institution"></div>
+      ${certificateField}</div>`;
+  }
+  if (category === "Workshop") {
+    box.innerHTML = `<div class="form-grid mt-4">
+      <div class="form-group"><label>Academic Year</label><input class="form-control" id="academic_year" placeholder="e.g. 2024-25"></div>
+      <div class="form-group"><label>Organized By</label><input class="form-control" id="organized_by" placeholder="Organized By"></div>
+      <div class="form-group full-width"><label>Title</label><input class="form-control" id="title" placeholder="Workshop Title"></div>
+      <div class="form-group"><label>Venue</label><input class="form-control" id="venue" placeholder="Venue"></div>
+      <div class="form-group"><label>Workshop Type</label><input class="form-control" id="workshop_type" placeholder="e.g. Technical / Soft Skills"></div>
+      <div class="form-group"><label>Start Date</label><input type="date" class="form-control" id="start_date"></div>
+      <div class="form-group"><label>End Date</label><input type="date" class="form-control" id="end_date"></div>
+      <div class="form-group"><label>Duration</label><input class="form-control" id="duration" placeholder="e.g. 2 Days"></div>
+      ${certificateField}</div>`;
+  }
+  if (category === "others") {
+    box.innerHTML = `<div class="form-grid mt-4">
+      <div class="form-group"><label>Faculty Name</label><input class="form-control" id="faculty_name" placeholder="Your Full Name"></div>
+      <div class="form-group"><label>Department</label>
+        <select class="form-control" id="department">
+          <option value="">Select Department</option>
+          <option value="IT">IT</option><option value="CS">CS</option>
+          <option value="MECH">Mechanical</option><option value="CIVIL">Civil</option>
+          <option value="AIDS">AIDS</option><option value="ENTC">ENTC</option>
+          <option value="FY">First Year</option><option value="OTHERS">Others</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Academic Year</label><input class="form-control" id="academic_year" placeholder="e.g. 2024-25"></div>
+      <div class="form-group"><label>Achievement Title</label><input class="form-control" id="title" placeholder="Title of Achievement"></div>
+      <div class="form-group full-width"><label>Description</label><input class="form-control" id="description" placeholder="Brief description"></div>
+      <div class="form-group"><label>Organized / Awarded By</label><input class="form-control" id="organized_by" placeholder="Organization / Body"></div>
+      <div class="form-group"><label>Date</label><input type="date" class="form-control" id="achievement_date"></div>
+      <div class="form-group"><label>Level</label><input class="form-control" id="level" placeholder="e.g. Institutional / National / International"></div>
+      ${certificateField}</div>`;
+  }
+}
+
+// ── UPLOAD ──
+function uploadAchievement() {
+  const category = document.getElementById("category").value;
+  const msgEl = document.getElementById("uploadMessage");
+  if (!category) { msgEl.style.color="#f87171"; msgEl.innerText="⚠️ Please select a category first."; return; }
+  const facultyId = getFacultyId();
+  if (!facultyId) { msgEl.style.color="#f87171"; msgEl.innerText="⚠️ Session expired."; return; }
+  const formData = new FormData();
+  formData.append("category", category);
+  formData.append("faculty_id", facultyId);
+  document.querySelectorAll("#dynamicFields input:not([type='file']), #dynamicFields select").forEach(input => {
+    if (input.value.trim()) formData.append(input.id, input.value.trim());
+  });
+  const certInput = document.getElementById("cert_file");
+  if (certInput?.files[0]) formData.append("certificate", certInput.files[0]);
+  msgEl.style.color="#60a5fa"; msgEl.innerText="Uploading...";
+  fetch("http://localhost:5000/upload-faculty-achievement", { method:"POST", body:formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { msgEl.style.color="#f87171"; msgEl.innerText="❌ "+data.error; }
+      else {
+        msgEl.style.color="#4ade80"; msgEl.innerText="✅ "+data.message;
+        document.getElementById("category").value = "";
+        document.getElementById("dynamicFields").innerHTML = "";
+      }
+    })
+    .catch(() => { msgEl.style.color="#f87171"; msgEl.innerText="❌ Upload failed."; });
+}
+
+// ── LOAD MY ACHIEVEMENTS ──
+function loadAchievements() {
+  const facultyId = getFacultyId();
+  const listEl = document.getElementById("achievementList");
+  if (!facultyId) { listEl.innerHTML='<div class="empty-state">Session expired.</div>'; return; }
+  listEl.innerHTML='<div class="empty-state">Loading...</div>';
+  fetch(`http://localhost:5000/get-faculty-achievements/${facultyId}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.length) { listEl.innerHTML='<div class="empty-state">No achievements uploaded yet.</div>'; return; }
+      const grouped = {};
+      data.forEach(item => { const c=item.category||"Other"; if(!grouped[c]) grouped[c]=[]; grouped[c].push(item); });
+      const skip = new Set(["faculty_id","category","source","uploaded_at","id","certificate_file","has_certificate"]);
+      let html="";
+      for (const [cat,items] of Object.entries(grouped)) {
+        html+=`<h5 style="margin-top:24px;color:#93c5fd;">${cat}</h5>`;
+        items.forEach(item => {
+          const fields = Object.entries(item).filter(([k,v])=>!skip.has(k)&&v)
+            .map(([k,v])=>`<span><b>${k.replace(/_/g," ")}:</b> ${v}</span>`).join(" &nbsp;|&nbsp; ");
+
+          // Uses viewCert Blob approach — opens in new tab, never downloads
+          const certLink = item.has_certificate
+            ? `<a href="#" onclick="viewCert('get-faculty-certificate','${item.source}','${item.id}'); return false;" style="margin-left:12px;color:#60a5fa;font-size:0.82rem;">📄 View Certificate</a>`
+            : `<span style="margin-left:12px;color:#64748b;font-size:0.82rem;">No Certificate</span>`;
+
+          html+=`<div style="background:rgba(255,255,255,0.07);border-radius:10px;padding:14px 18px;margin-top:10px;font-size:0.85rem;line-height:2;">
+            ${fields}
+            ${certLink}
+          </div>`;
+        });
+      }
+      listEl.innerHTML=html;
+    })
+    .catch(()=>{ listEl.innerHTML='<div class="empty-state">Failed to load.</div>'; });
+}
+
+// ── CLASS SEARCH ──
+let currentSearchYear="", currentSearchDept="";
+function searchClassAchievements() {
+  const year=document.getElementById("classYearSelect").value;
+  const dept=document.getElementById("classDeptSelect").value;
+  const msgEl=document.getElementById("searchMsg");
+  const wrap=document.getElementById("resultsWrap");
+  const summary=document.getElementById("resultSummary");
+  const dlBtn=document.getElementById("downloadPdfBtn");
+  if (!year&&!dept) { msgEl.style.color="#f87171"; msgEl.innerText="⚠️ Please select at least a Class or Department."; return; }
+  currentSearchYear=year; currentSearchDept=dept;
+  msgEl.style.color="#60a5fa"; msgEl.innerText="Searching...";
+  wrap.innerHTML=""; summary.innerText=""; dlBtn.style.display="none";
+  const params=new URLSearchParams();
+  if (year) params.append("year",year);
+  if (dept) params.append("department",dept);
+  fetch(`http://localhost:5000/class-achievements?${params.toString()}`)
+    .then(r=>r.json())
+    .then(data => {
+      msgEl.innerText="";
+      if (!data.length) { wrap.innerHTML=`<div class="empty-state" style="margin-top:30px;">No achievements found.</div>`; return; }
+      const uniqueStudents=new Set(data.map(d=>d.student_id)).size;
+      const withCerts=data.filter(d=>d.has_certificate).length;
+      summary.innerText=`Found ${data.length} achievement(s) from ${uniqueStudents} student(s) · ${withCerts} certificate(s) available`;
+      if (withCerts>0) dlBtn.style.display="inline-block";
+      const catLabels={conference:"Conference",cultural:"Cultural",higher:"Higher Edu",internship:"Internship",journal:"Journal",sports:"Sports",technical:"Technical"};
+      let rows="";
+      data.forEach(item => {
+        const catLabel=catLabels[item.category]||item.category;
+        const title=item.paper_title||item.event_name||item.internship_title||item.exam_name||"—";
+        // Uses viewCert Blob approach
+        const certCell=item.has_certificate
+          ?`<a class="cert-link" href="#" onclick="viewCert('get-certificate','${item.source}','${item.id}'); return false;">📄 View</a>`
+          :`<span class="no-cert">—</span>`;
+        rows+=`<tr>
+          <td>${item.student_name||"—"}</td><td>${item.department||"—"}</td>
+          <td><span class="badge-category">${catLabel}</span></td>
+          <td style="max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${title}">${title}</td>
+          <td>${item.academic_year||"—"}</td><td>${certCell}</td>
+        </tr>`;
+      });
+      wrap.innerHTML=`<table class="results-table"><thead><tr>
+        <th>Student Name</th><th>Department</th><th>Category</th><th>Title / Achievement</th><th>Academic Year</th><th>Certificate</th>
+      </tr></thead><tbody>${rows}</tbody></table>`;
+    })
+    .catch(err=>{ console.error(err); msgEl.style.color="#f87171"; msgEl.innerText="❌ Failed to fetch."; });
+}
+
+function downloadClassPdf() {
+  const btn=document.getElementById("downloadPdfBtn");
+  btn.innerText="⏳ Generating PDF..."; btn.disabled=true;
+  const params=new URLSearchParams();
+  if (currentSearchYear) params.append("year",currentSearchYear);
+  if (currentSearchDept) params.append("department",currentSearchDept);
+  const a=document.createElement("a");
+  a.href=`http://localhost:5000/download-class-pdf?${params.toString()}`;
+  a.download=`${currentSearchYear||"all"}_${currentSearchDept||"all"}_certificates.pdf`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>{ btn.innerText="📥 Download All Certificates as PDF"; btn.disabled=false; },4000);
+}
+
+// ══════════════════════════════════════════
+// ANALYSIS
+// ══════════════════════════════════════════
+let analysisData=[], pieChartInst=null;
+
+const CAT_LABELS={
+  conference:"Conference", cultural:"Cultural", higher:"Higher Education",
+  internship:"Internship", journal:"Journal", sports:"Sports", technical:"Technical"
+};
+const CAT_COLORS=["#60a5fa","#fbbf24","#34d399","#a78bfa","#f87171","#fb923c","#38bdf8","#4ade80"];
+
+const CAT_COLUMNS = {
+  conference: [
+    { key:"roll_no",             label:"Roll No" },
+    { key:"paper_title",         label:"Paper Title",       truncate:true },
+    { key:"conference_name",     label:"Conference Name",   truncate:true },
+    { key:"conference_level",    label:"Level" },
+    { key:"conference_date",     label:"Date" },
+    { key:"conference_venue",    label:"Venue",             truncate:true },
+    { key:"issn",                label:"ISSN" },
+    { key:"academic_year",       label:"Acad. Year" },
+  ],
+  journal: [
+    { key:"roll_no",             label:"Roll No" },
+    { key:"paper_title",         label:"Paper Title",       truncate:true },
+    { key:"conference_name",     label:"Journal Name",      truncate:true },
+    { key:"conference_level",    label:"Level" },
+    { key:"issn",                label:"ISSN" },
+    { key:"publication_year",    label:"Pub. Year" },
+    { key:"academic_year",       label:"Acad. Year" },
+  ],
+  technical: [
+    { key:"roll_no",             label:"Roll No" },
+    { key:"event_name",          label:"Event Name",        truncate:true },
+    { key:"sub_event",           label:"Sub Event" },
+    { key:"event_type",          label:"Event Type" },
+    { key:"role",                label:"Role" },
+    { key:"organizer",           label:"Organizer",         truncate:true },
+    { key:"level",               label:"Level" },
+    { key:"mode",                label:"Mode" },
+    { key:"place",               label:"Place" },
+    { key:"academic_year",       label:"Acad. Year" },
+  ],
+  cultural: [
+    { key:"roll_no",             label:"Roll No" },
+    { key:"event_name",          label:"Event Name",        truncate:true },
+    { key:"sub_event",           label:"Sub Event" },
+    { key:"role",                label:"Role" },
+    { key:"organizer_name",      label:"Organizer",         truncate:true },
+    { key:"organizer_level",     label:"Level" },
+    { key:"place",               label:"Place" },
+    { key:"award",               label:"Award" },
+    { key:"academic_year",       label:"Acad. Year" },
+  ],
+  internship: [
+    { key:"roll_no",             label:"Roll No" },
+    { key:"internship_title",    label:"Internship Title",  truncate:true },
+    { key:"company_name",        label:"Company",           truncate:true },
+    { key:"duration_months",     label:"Duration (mo.)" },
+    { key:"mode",                label:"Mode" },
+    { key:"stipend",             label:"Stipend (₹)" },
+    { key:"academic_year",       label:"Acad. Year" },
+  ],
+  sports: [
+    { key:"roll_no",             label:"Roll No" },
+    { key:"event_name",          label:"Event Name",        truncate:true },
+    { key:"sub_event",           label:"Sub Event" },
+    { key:"sports_type",         label:"Sports Type" },
+    { key:"role",                label:"Role" },
+    { key:"level",               label:"Level" },
+    { key:"place",               label:"Place" },
+    { key:"award",               label:"Award" },
+    { key:"prize_money",         label:"Prize (₹)" },
+    { key:"academic_year",       label:"Acad. Year" },
+  ],
+  higher: [
+    { key:"roll_no",             label:"Roll No" },
+    { key:"qualifying_exam",     label:"Qualifying Exam",   truncate:true },
+    { key:"scorecard_pdf",       label:"Score/Rank" },
+    { key:"university_name",     label:"University",        truncate:true },
+    { key:"specialization",      label:"Specialization" },
+    { key:"passing_year",        label:"Passing Year" },
+    { key:"academic_year",       label:"Acad. Year" },
+  ]
+};
+
+function buildCategoryTable(items, category) {
+  const cols = CAT_COLUMNS[category];
+  if (!cols) return buildGenericTable(items);
+  const thead = `<tr>
+    <th>#</th><th>Student Name</th><th>Dept</th>
+    ${cols.map(c=>`<th>${c.label}</th>`).join("")}
+    <th>Certificate</th>
+  </tr>`;
+  const tbody = items.map((item, i) => {
+    // Uses viewCert Blob approach
+    const certCell = item.has_certificate
+      ? `<a class="cert-link" href="#" onclick="viewCert('get-certificate','${item.source}','${item.id}'); return false;">📄 View</a>`
+      : `<span class="no-cert">—</span>`;
+    const dataCells = cols.map(c => {
+      let val = item[c.key] || "—";
+      if (val !== "—" && (c.key.includes("date") || c.key.includes("year")) && String(val).match(/^\d{4}-\d{2}-\d{2}/)) {
+        val = new Date(val).toLocaleDateString("en-IN", {day:"2-digit",month:"short",year:"numeric"});
+      }
+      if ((c.key === "stipend" || c.key === "prize_money" || c.key === "financial_support") && val !== "—") {
+        val = "₹" + Number(val).toLocaleString("en-IN");
+      }
+      const style = c.truncate ? ` class="td-truncate" title="${esc(String(val))}"` : "";
+      return `<td${style}>${esc(String(val))}</td>`;
+    }).join("");
+    return `<tr>
+      <td class="sr">${i+1}</td>
+      <td>${esc(item.student_name||"—")}</td>
+      <td>${esc(item.department||"—")}</td>
+      ${dataCells}
+      <td>${certCell}</td>
+    </tr>`;
+  }).join("");
+  return `<table class="analysis-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
+}
+
+function buildGenericTable(items) {
+  const rows = items.map((item,i) => {
+    const title = item.paper_title||item.event_name||item.internship_title||item.exam_name||item.sport_name||"—";
+    // Uses viewCert Blob approach
+    const certCell = item.has_certificate
+      ? `<a class="cert-link" href="#" onclick="viewCert('get-certificate','${item.source}','${item.id}'); return false;">📄 View</a>`
+      : `<span class="no-cert">—</span>`;
+    return `<tr>
+      <td class="sr">${i+1}</td>
+      <td>${esc(item.student_name||"—")}</td>
+      <td>${esc(item.department||"—")}</td>
+      <td><span class="badge-${item.category}">${CAT_LABELS[item.category]||item.category||"—"}</span></td>
+      <td class="td-truncate" title="${esc(title)}">${esc(title)}</td>
+      <td>${esc(item.academic_year||"—")}</td>
+      <td>${certCell}</td>
+    </tr>`;
+  }).join("");
+  return `<table class="analysis-table">
+    <thead><tr><th>#</th><th>Student Name</th><th>Dept</th><th>Category</th><th>Title/Achievement</th><th>Acad. Year</th><th>Certificate</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function buildTableHTML(data, filterCat) {
+  if (filterCat) return buildCategoryTable(data, filterCat);
+  const grouped = {};
+  data.forEach(item => {
+    const c = item.category || "other";
+    if (!grouped[c]) grouped[c] = [];
+    grouped[c].push(item);
+  });
+  return Object.entries(grouped).map(([cat, items]) => {
+    const label = CAT_LABELS[cat] || cat;
+    const badgeClass = `badge-${cat}`;
+    return `
+      <div class="cat-section-label">
+        <span class="${badgeClass}">${label}</span>
+        <span style="color:#64748b;font-size:0.78rem;">${items.length} record${items.length!==1?"s":""}</span>
+        <hr>
+      </div>
+      ${buildCategoryTable(items, cat)}
+      <div style="margin-bottom:24px;"></div>`;
+  }).join("");
+}
+
+function runAnalysis() {
+  const year = document.getElementById("aYear").value;
+  const dept = document.getElementById("aDept").value;
+  const cat  = document.getElementById("aCat").value;
+  const msgEl     = document.getElementById("analysisMsg");
+  const tableWrap = document.getElementById("analysisTableWrap");
+  const statsEl   = document.getElementById("analysisStats");
+  const dlRow     = document.getElementById("analysisDlRow");
+  const certWrap  = document.getElementById("certSectionWrap");
+  const certGrid  = document.getElementById("analysisCertGrid");
+  const chartWrap = document.getElementById("chartSectionWrap");
+  statsEl.style.display="none"; dlRow.style.display="none";
+  certWrap.style.display="none"; chartWrap.style.display="none";
+  certGrid.innerHTML=""; analysisData=[];
+  if (pieChartInst) { pieChartInst.destroy(); pieChartInst=null; }
+  msgEl.innerHTML=`<span class="analysis-spinner"></span> Fetching achievements…`;
+  tableWrap.innerHTML="";
+  const params=new URLSearchParams();
+  if (year) params.append("year",year);
+  if (dept) params.append("department",dept);
+  fetch(`http://localhost:5000/all-student-achievements?${params.toString()}`)
+    .then(r=>r.json())
+    .then(rawData => {
+      msgEl.innerHTML="";
+      let data = cat ? rawData.filter(d=>d.category===cat) : rawData;
+      if (!data.length) {
+        tableWrap.innerHTML=`<div class="analysis-empty"><div class="icon">📭</div>No achievements found for the selected filters.</div>`;
+        return;
+      }
+      analysisData=data;
+      const uniqueStudents=new Set(data.map(d=>d.student_id)).size;
+      const uniqueDepts=new Set(data.map(d=>d.department)).size;
+      const hasCerts=data.filter(d=>d.has_certificate).length;
+      document.getElementById("statTotal").textContent=data.length;
+      document.getElementById("statStudents").textContent=uniqueStudents;
+      document.getElementById("statDepts").textContent=uniqueDepts;
+      document.getElementById("statCerts").textContent=hasCerts;
+      statsEl.style.display="flex";
+      renderPieChart(data);
+      dlRow.style.display="flex";
+      tableWrap.innerHTML = buildTableHTML(data, cat);
+      const withCerts=data.filter(d=>d.has_certificate);
+      if (withCerts.length) {
+        certWrap.style.display="block";
+        certGrid.innerHTML=withCerts.map(item => {
+          const apiUrl=`http://localhost:5000/get-certificate/${item.source}/${item.id}`;
+          const title=esc(item.paper_title||item.event_name||item.internship_title||item.exam_name||"Achievement");
+          const catLbl=CAT_LABELS[item.category]||item.category||"";
+          // Image preview still uses direct URL (for <img> src rendering)
+          // Open link uses viewCert Blob approach
+          return `<div class="cert-card">
+            <img class="cert-card-preview" src="${apiUrl}" alt="Certificate"
+              onerror="this.outerHTML='<div class=\\'cert-card-pdf-preview\\'><div class=\\'pdf-icon\\'>📄</div><span>PDF Document</span></div>'">
+            <div class="cert-card-body">
+              <p>${esc(item.student_name||"Student")}</p>
+              <span>${catLbl}${title?" — "+title.substring(0,35):""}</span>
+              <a href="#" onclick="viewCert('get-certificate','${item.source}','${item.id}'); return false;">🔗 Open Certificate</a>
+            </div>
+          </div>`;
+        }).join("");
+      }
+    })
+    .catch(err=>{ console.error(err); msgEl.style.color="#f87171"; msgEl.innerHTML="❌ Failed to fetch. Is the server running?"; });
+}
+
+// ── PIE CHART ──
+function renderPieChart(data) {
+  const legendEl=document.getElementById("chartLegend");
+  const totalBadge=document.getElementById("chartTotalBadge");
+  const chartWrap=document.getElementById("chartSectionWrap");
+  const counts={};
+  data.forEach(d=>{ const key=d.category||"other"; const lbl=CAT_LABELS[key]||key; counts[lbl]=(counts[lbl]||0)+1; });
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const labels=sorted.map(e=>e[0]);
+  const values=sorted.map(e=>e[1]);
+  const total=values.reduce((a,b)=>a+b,0);
+  const colors=labels.map((_,i)=>CAT_COLORS[i%CAT_COLORS.length]);
+  if (pieChartInst) { pieChartInst.destroy(); pieChartInst=null; }
+  const ctx=document.getElementById("categoryPieChart").getContext("2d");
+  pieChartInst=new Chart(ctx,{
+    type:"pie",
+    data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderColor:"#0f1624", borderWidth:2, hoverOffset:12 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:false },
+        datalabels:{
+          display:ctx=>{ const val=ctx.dataset.data[ctx.dataIndex]; return (val/total*100)>=4; },
+          color:"#ffffff",
+          font:{ weight:"700", size:11, family:"'Inter',sans-serif" },
+          textShadowColor:"rgba(0,0,0,0.6)", textShadowBlur:4,
+          formatter:(value,ctx)=>{
+            const pct=((value/total)*100).toFixed(1);
+            const lbl=ctx.chart.data.labels[ctx.dataIndex];
+            return lbl+"\n"+pct+"%";
+          },
+          textAlign:"center", anchor:"center", align:"center", clamp:true
+        },
+        tooltip:{ callbacks:{ label:ctx=>` ${ctx.label}: ${ctx.parsed} students (${((ctx.parsed/total)*100).toFixed(1)}%)` } }
+      }
+    }
+  });
+  totalBadge.innerHTML=`<strong>${total}</strong><span>Total Achievements</span>`;
+  legendEl.innerHTML=labels.map((lbl,i)=>{
+    const pct=((values[i]/total)*100).toFixed(1);
+    const barPct=((values[i]/values[0])*100).toFixed(1);
+    return `<div class="legend-item">
+      <div class="legend-dot" style="background:${colors[i]}"></div>
+      <span class="legend-label">${lbl}</span>
+      <span class="legend-count">${values[i]}</span>
+      <div class="legend-bar-wrap"><div class="legend-bar-fill" style="width:${barPct}%;background:${colors[i]};"></div></div>
+      <span class="legend-pct">${pct}%</span>
+    </div>`;
+  }).join("");
+  chartWrap.style.display="block";
+}
+
+// ── DOWNLOAD TABLE PDF ──
+function downloadAnalysisTablePDF() {
+  if (!analysisData.length) { alert("No data to export."); return; }
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF({ orientation:"landscape", unit:"mm", format:"a4" });
+  const year=document.getElementById("aYear").value||"All";
+  const dept=document.getElementById("aDept").value||"All";
+  const cat=document.getElementById("aCat").value||"All";
+  doc.setFontSize(16); doc.setTextColor(40,100,220);
+  doc.text("Student Achievement Report",14,16);
+  doc.setFontSize(9); doc.setTextColor(100,116,139);
+  doc.text(`Year: ${year}   Dept: ${dept}   Category: ${cat}   Total: ${analysisData.length}`,14,23);
+  doc.text(`Generated: ${new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}`,14,28);
+  const grouped={};
+  analysisData.forEach(item=>{ const c=item.category||"other"; if(!grouped[c]) grouped[c]=[]; grouped[c].push(item); });
+  let startY=33;
+  for (const [cat, items] of Object.entries(grouped)) {
+    const cols=CAT_COLUMNS[cat]||[];
+    const label=CAT_LABELS[cat]||cat;
+    doc.setFontSize(11); doc.setTextColor(37,99,235);
+    doc.text(label,14,startY); startY+=5;
+    const head=[["#","Student Name","Dept",...cols.map(c=>c.label),"Certificate"]];
+    const body=items.map((item,i)=>{
+      const certCell=item.has_certificate?"Yes":"No";
+      const dataCells=cols.map(c=>{
+        let val=item[c.key]||"—";
+        if (val!=="—"&&(c.key.includes("date"))&&String(val).match(/^\d{4}-\d{2}-\d{2}/))
+          val=new Date(val).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+        if ((c.key==="stipend"||c.key==="prize_money")&&val!=="—") val="₹"+Number(val).toLocaleString("en-IN");
+        return String(val).substring(0,40);
+      });
+      return [i+1,item.student_name||"—",item.department||"—",...dataCells,certCell];
+    });
+    doc.autoTable({
+      startY, head, body,
+      styles:{ fontSize:8, cellPadding:3 },
+      headStyles:{ fillColor:[37,99,235], textColor:255, fontStyle:"bold" },
+      alternateRowStyles:{ fillColor:[245,247,255] },
+      margin:{ left:14, right:14 },
+      didDrawPage:(d)=>{ startY=d.cursor.y+6; }
+    });
+    startY=doc.lastAutoTable.finalY+10;
+  }
+  doc.save(`achievements_${year}_${dept}_${cat}.pdf`);
+}
+
+// ── DOWNLOAD CERTS PDF ──
+function downloadAnalysisCertsPDF() {
+  const hasCerts=analysisData.filter(d=>d.has_certificate);
+  if (!hasCerts.length) { alert("No certificates available for this filter."); return; }
+  const year=document.getElementById("aYear").value;
+  const dept=document.getElementById("aDept").value;
+  const params=new URLSearchParams();
+  if (year) params.append("year",year);
+  if (dept) params.append("department",dept);
+  const a=document.createElement("a");
+  a.href=`http://localhost:5000/download-class-pdf?${params.toString()}`;
+  a.download=`certificates_${year||"all"}_${dept||"all"}.pdf`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function esc(str) {
+  if (!str) return "";
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+</script>
+</body>
+</html>

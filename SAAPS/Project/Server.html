@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate Upload & Analysis Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Style.css">
+</head>
+<body>
+
+<!-- Animated background particles -->
+<div class="bg-particles">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header class="top-header">
+  <div class="header-inner">
+    <div class="college-logo">
+      <div class="logo-icon">🎓</div>
+      <div class="college-text">
+        <span class="trust-name">Akhil Bharatiya Maratha Shikshan Parishad's</span>
+        <span class="college-name">Anantrao Pawar College of Engineering & Research, Pune</span>
+      </div>
+    </div>
+    <div class="header-badge">NAAC Accredited</div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">📋</div>
+      <span>Portal</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" id="homeLink" class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span>Home</span>
+      </a>
+
+      <div class="nav-group">
+        <a href="#" id="loginLink" class="nav-item nav-toggle">
+          <span class="nav-icon">🔐</span>
+          <span>Login</span>
+          <span class="arrow">›</span>
+        </a>
+        <div class="dropdown-container" id="loginDropdown">
+          <a href="#" id="studentLogin" class="sub-item">👨‍🎓 Student</a>
+          <a href="#" id="facultyLogin" class="sub-item">👩‍🏫 Faculty</a>
+          <a href="#" id="adminLogin"   class="sub-item">🛡️ Admin</a>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <a href="#" id="createAccountLink" class="nav-item nav-toggle">
+          <span class="nav-icon">🆕</span>
+          <span>Register</span>
+          <span class="arrow">›</span>
+        </a>
+        <div class="dropdown-container" id="createAccountDropdown">
+          <a href="#" id="studentAccount" class="sub-item">👨‍🎓 Student</a>
+          <a href="#" id="facultyAccount" class="sub-item">👩‍🏫 Faculty</a>
+          <a href="#" id="adminAccount"   class="sub-item">🛡️ Admin</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text">© 2026 APCOER</div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main-content">
+    <div id="dynamicContent"></div>
+  </main>
+
+</div>
+
+<script src="Script.js"></script>
+</body>
+</html>

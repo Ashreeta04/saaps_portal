@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About - Student Achievements Analytics and Portfolio 
+System (SAAPS)</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f2027, #1c1c2b, #2c3e50);
+      color: #e4e4e4;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      text-align: center;
+      padding: 45px 15px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    header h1 {
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      color: #cfcfcf;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .section-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      transition: all 0.4s ease;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+    }
+
+    .section-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+    }
+
+    .section-icon {
+      font-size: 1.8rem;
+      color: #8ab4f8;
+      margin-right: 12px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    p {
+      line-height: 1.7;
+      font-size: 0.95rem;
+      color: #d6d6d6;
+    }
+
+    footer {
+      background: rgba(0, 0, 0, 0.75);
+      text-align: center;
+      padding: 20px;
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: #bbbbbb;
+    }
+
+    @media (max-width: 576px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="animate__animated animate__fadeInDown">
+    <a href="Server.html" class="btn btn-outline-light btn-sm back-btn">
+      <i class="fas fa-arrow-left"></i> Back
+    </a>
+    <h1>About Our Platform</h1>
+    <p class="mt-2">Student Achievements Analytics and Portfolio 
+System (SAAPS)</p>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container py-5">
+
+    <!-- Security -->
+    <div class="section-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s; animation-fill-mode: forwards;">
+      <div class="section-title">
+        <i class="fas fa-shield-alt section-icon"></i>
+        <h5 class="mb-0">Data Protection & Security</h5>
+      </div>
+      <p>
+        The platform is built with strong security standards to safeguard academic and personal information. Encrypted credentials and secure session handling mechanisms ensure that only authorized users can access their data. All records and documents are stored safely to maintain confidentiality and integrity.
+      </p>
+    </div>
+
+    <!-- Storage -->
+    <div class="section-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s; animation-fill-mode: forwards;">
+      <div class="section-title">
+        <i class="fas fa-database section-icon"></i>
+        <h5 class="mb-0">Systematic Achievement Storage</h5>
+      </div>
+      <p>
+        Every accomplishment uploaded by students or faculty members is maintained in a well-structured database. Details such as submission date, academic year, and associated user information are preserved, allowing quick access and organized record keeping.
+      </p>
+    </div>
+
+    <!-- UI -->
+    <div class="section-card animate__animated animate__fadeInUp" style="animation-delay: 0.6s; animation-fill-mode: forwards;">
+      <div class="section-title">
+        <i class="fas fa-laptop-code section-icon"></i>
+        <h5 class="mb-0">Modern & Responsive Interface</h5>
+      </div>
+      <p>
+        The application features a clean and responsive design that adapts seamlessly across various devices. Its structured layout and simple navigation allow users to efficiently upload, access, and manage their achievements without confusion.
+      </p>
+    </div>
+
+    <!-- Portfolio Management -->
+    <div class="section-card animate__animated animate__fadeInUp" style="animation-delay: 0.8s; animation-fill-mode: forwards;">
+      <div class="section-title">
+        <i class="fas fa-briefcase section-icon"></i>
+        <h5 class="mb-0">Digital Portfolio Management</h5>
+      </div>
+      <p>
+        The system enables users to build and maintain a comprehensive digital portfolio by organizing certificates, projects, internships, and other accomplishments in one place. This structured portfolio can be easily updated, reviewed, and shared when required, helping individuals present their academic and professional profile effectively.
+      </p>
+    </div>
+
+    <!-- Manage -->
+    <div class="section-card animate__animated animate__fadeInUp" style="animation-delay: 1s; animation-fill-mode: forwards;">
+      <div class="section-title">
+        <i class="fas fa-folder-open section-icon"></i>
+        <h5 class="mb-0">View, Download & Update Records</h5>
+      </div>
+      <p>
+        Users can preview uploaded files directly within the system, download them for external use, and modify entries whenever updates are needed. Faculty members are also provided with search and filter options to efficiently monitor and manage student records.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="animate__animated animate__fadeInUp animate__delay-1s">
+    &copy; 2026 Student Achievements Analytics and Portfolio 
+System (SAAPS) | ABMSP's APCOER, Pune
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

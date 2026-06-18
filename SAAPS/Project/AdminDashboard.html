@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Admin Dashboard</title>
+
+<link rel="stylesheet" href="AdminDashboard.css" />
+<script defer src="AdminDashboard.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="brand">
+      <i class="fas fa-layer-group"></i>
+      <span>AdminPanel</span>
+    </div>
+
+    <div class="admin-profile">
+      <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+      <h3>Administrator</h3>
+    </div>
+
+    <ul class="nav">
+      <li onclick="showSection('dashboardView')">
+        <i class="fas fa-chart-pie"></i> Dashboard
+      </li>
+      <li onclick="showSection('classView')">
+        <i class="fas fa-graduation-cap"></i> Classes
+      </li>
+      <li onclick="showSection('studentSection')">
+        <i class="fas fa-user-graduate"></i> Students
+      </li>
+      <li onclick="showSection('teacherSection')">
+        <i class="fas fa-chalkboard-teacher"></i> Faculty
+      </li>
+      <li onclick="showSection('achievementSection')">
+        <i class="fas fa-award"></i> Achievements
+      </li>
+    </ul>
+
+  </aside>
+
+  <!-- MAIN AREA -->
+  <main class="main-content">
+
+    <div class="topbar">
+      <h1>Dashboard Overview</h1>
+      <button onclick="logout()" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <section id="dashboardView" class="content-section">
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <i class="fas fa-user-graduate"></i>
+          <div>
+            <h2 id="studentCount">—</h2>
+            <p>Total Students</p>
+          </div>
+        </div>
+
+        <div class="stat-card purple">
+          <i class="fas fa-chalkboard-teacher"></i>
+          <div>
+            <h2 id="teacherCount">—</h2>
+            <p>Total Faculty</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="announcement">
+        📢 <strong>Announcement:</strong> All latest achievements will appear in the Achievements section.
+      </div>
+
+    </section>
+
+    <!-- ==================== STUDENTS ==================== -->
+    <section id="studentSection" class="content-section" style="display:none;">
+
+      <div class="section-header">
+        <h2>Student Management</h2>
+        <div>
+          <button class="btn" onclick="showStudentSub('view')">View</button>
+          <button class="btn primary" onclick="showStudentSub('add')">Add</button>
+        </div>
+      </div>
+
+      <!-- Student List -->
+      <div id="studentView" class="sub-content" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Year</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentTableBody">
+            <tr><td colspan="6" style="text-align:center;opacity:0.6;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add Student -->
+      <div id="studentAdd" class="sub-content" style="display:none;">
+        <form id="studentForm" class="modern-form">
+          <input type="text"     id="sname"     placeholder="Full Name"  required>
+          <input type="email"    id="semail"    placeholder="Email"      required>
+          <input type="text"     id="sphone"    placeholder="Phone"      required>
+          <input type="password" id="spassword" placeholder="Password"   required>
+          <select id="syear" required style="padding:12px;border-radius:6px;border:none;">
+            <option value="">Select Year</option>
+            <option value="FE">First Year (FE)</option>
+            <option value="SE">Second Year (SE)</option>
+            <option value="TE">Third Year (TE)</option>
+            <option value="BE">Final Year (BE)</option>
+          </select>
+          <button type="submit" class="btn primary">Register Student</button>
+          <p id="studentMsg"></p>
+        </form>
+      </div>
+
+    </section>
+
+    <!-- ==================== TEACHERS ==================== -->
+    <section id="teacherSection" class="content-section" style="display:none;">
+
+      <div class="section-header">
+        <h2>Faculty Management</h2>
+        <div>
+          <button class="btn" onclick="showTeacherSub('view')">View</button>
+          <button class="btn primary" onclick="showTeacherSub('add')">Add</button>
+        </div>
+      </div>
+
+      <!-- Teacher List -->
+      <div id="teacherView" class="sub-content" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="teacherTableBody">
+            <tr><td colspan="5" style="text-align:center;opacity:0.6;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add Teacher -->
+      <div id="teacherAdd" class="sub-content" style="display:none;">
+        <form id="facultyForm" class="modern-form">
+          <input type="text"     id="fname"     placeholder="Full Name" required>
+          <input type="email"    id="femail"    placeholder="Email"     required>
+          <input type="text"     id="fphone"    placeholder="Phone"     required>
+          <input type="password" id="fpassword" placeholder="Password"  required>
+          <button type="submit" class="btn primary">Register Faculty</button>
+          <p id="facultyMsg"></p>
+        </form>
+      </div>
+
+    </section>
+
+    <!-- ==================== CLASSES ==================== -->
+    <section id="classView" class="content-section" style="display:none;">
+      <h2>Class Distribution</h2>
+
+      <div class="class-grid">
+        <div class="class-card orange">First Year (F.E) <span id="year1">—</span></div>
+        <div class="class-card purple">Second Year (S.E) <span id="year2">—</span></div>
+        <div class="class-card blue">Third Year (T.E) <span id="year3">—</span></div>
+        <div class="class-card green">Final Year (B.E) <span id="year4">—</span></div>
+      </div>
+    </section>
+
+    <!-- ==================== ACHIEVEMENTS ==================== -->
+    <section id="achievementSection" class="content-section" style="display:none;">
+
+      <div class="section-header">
+        <h2>All Achievements</h2>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Uploaded On</th>
+          </tr>
+        </thead>
+        <tbody id="achievementTableBody">
+          <tr><td colspan="4" style="text-align:center;opacity:0.6;">Click Achievements to load data</td></tr>
+        </tbody>
+      </table>
+
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
